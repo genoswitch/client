@@ -70,6 +70,25 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return iface.interfaceNumber;
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
+		case EventType.FIND_DFU_INTERFACE:
+			// Check that this device has firmware built with flashloader support.
+			await ensure.flashloaderFeature(
+				client,
+				ctx,
+				ev,
+				async () => {
+					// TODO: Should check that the interface has not already been found.
+					await ensure.deviceOpened(client, ctx, ev, async () => {
+						const iface = client.findInterface(Filters.DFU);
+
+						// Found the interface! Let's set it
+						client.setDFUInterface(iface);
+						return iface.interfaceNumber;
+					});
+				},
+				false
+			);
+			break; // IMPORTANT! Otherwise will continue exec following cases
 		case EventType.CLAIM_VENDOR_INTERFACE:
 			await ensure.usbInterface(client, ctx, ev, async () => {
 				if (!client.getInterface().claimed) {
@@ -82,6 +101,30 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 					throw new Error("Attempted to claim interface but was already claimed!");
 				}
 			});
+			break;
+		case EventType.CLAIM_DFU_INTERFACE:
+			// Check that this device has firmware built with flashloader support.
+			await ensure.flashloaderFeature(
+				client,
+				ctx,
+				ev,
+				async () => {
+					await ensure.flashloaderInterface(client, ctx, ev, async () => {
+						if (!client.getDFUInterface().claimed) {
+							const ifaceNum = client.getDFUInterface().interfaceNumber;
+							return await client.getDevice().claimInterface(ifaceNum);
+						} else {
+							// Device already claimed! Let's return an error message.
+							ctx.postMessage(
+								new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_ALREADY_CLAIMED)
+							);
+							// Now let's throw an error. This will cancel the promise so that ensure will not send a success message.
+							throw new Error("Attempted to claim interface but was already claimed!");
+						}
+					});
+				},
+				false
+			);
 			break;
 		// Commands using vendor requests
 		// To avoid attempting to send 'USBTransferInResult' instances and reconstruct at the other end, caching will be managed by the worker.

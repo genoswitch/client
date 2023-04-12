@@ -118,10 +118,24 @@ export class Client {
 		console.log("Found interface", res.data);
 	}
 
+	private async workerFindDFUInterface() {
+		const req = new EventRequest(EventType.FIND_DFU_INTERFACE);
+		const res = await this.makeRequest(req);
+		// Check return datatype?
+		// Not returned though, only used for debugging.
+		console.log("Found DFU interface", res.data);
+	}
+
 	private async workerClaimInterface() {
 		const req = new EventRequest(EventType.CLAIM_VENDOR_INTERFACE);
 		await this.makeRequest(req);
 		console.log("Claimed interface");
+	}
+
+	private async workerClaimDFUInterface() {
+		const req = new EventRequest(EventType.CLAIM_DFU_INTERFACE);
+		await this.makeRequest(req);
+		console.log("Claimed DFU interface");
 	}
 
 	async setup() {
@@ -137,6 +151,12 @@ export class Client {
 		await this.workerFindInterface();
 
 		await this.workerClaimInterface();
+
+		if ((await this.getFeatureSet()).getHasFlashloaderSupport()) {
+			console.log("Flashloader support detected. Attempting to find and claim iface...");
+			await this.workerFindDFUInterface();
+			await this.workerClaimDFUInterface();
+		}
 	}
 
 	private onMessage = (ev: MessageEvent<EventResponse>) => {
