@@ -111,7 +111,7 @@ export class Client {
 	}
 
 	private async workerFindInterface() {
-		const req = new EventRequest(EventType.FIND_INTERFACE);
+		const req = new EventRequest(EventType.FIND_VENDOR_INTERFACE);
 		const res = await this.makeRequest(req);
 		// Check return datatype?
 		// Not returned though, only used for debugging.
@@ -119,7 +119,7 @@ export class Client {
 	}
 
 	private async workerClaimInterface() {
-		const req = new EventRequest(EventType.CLAIM_INTERFACE);
+		const req = new EventRequest(EventType.CLAIM_VENDOR_INTERFACE);
 		await this.makeRequest(req);
 		console.log("Claimed interface");
 	}

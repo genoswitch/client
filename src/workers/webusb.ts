@@ -60,7 +60,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				client.getDevice().open();
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
-		case EventType.FIND_INTERFACE:
+		case EventType.FIND_VENDOR_INTERFACE:
 			// TODO: Should check that the interface has not already been found.
 			await ensure.deviceOpened(client, ctx, ev, async () => {
 				const iface = client.findInterface(Filters.VENDOR);
@@ -70,7 +70,7 @@ ctx.onmessage = async (ev: MessageEvent<EventRequest>) => {
 				return iface.interfaceNumber;
 			});
 			break; // IMPORTANT! Otherwise will continue exec following cases
-		case EventType.CLAIM_INTERFACE:
+		case EventType.CLAIM_VENDOR_INTERFACE:
 			await ensure.usbInterface(client, ctx, ev, async () => {
 				if (!client.getInterface().claimed) {
 					const ifaceNum = client.getInterface().interfaceNumber;
