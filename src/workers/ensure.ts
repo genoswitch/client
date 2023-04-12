@@ -196,3 +196,46 @@ export const interfaceClaimed = async (
 		false
 	);
 };
+
+export const flashloaderFeature = async (
+	wClient: WorkerClient,
+	ctx: Worker,
+	ev: MessageEvent<EventRequest>,
+	func: () => Promise<any>,
+	sendSuccessMsg: boolean = true
+) => {
+	if ((await wClient.getFeatureSet()).getHasFlashloaderSupport()) {
+		const responseData = await func();
+		// Func completed successfully
+		if (sendSuccessMsg) ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
+	} else {
+		ctx.postMessage(new EventResponse(ev.data, Status.ERR_FEATURE_NOT_AVAILABLE));
+	}
+};
+
+export const flashloaderInterface = async (
+	wClient: WorkerClient,
+	ctx: Worker,
+	ev: MessageEvent<EventRequest>,
+	func: () => Promise<any>,
+	sendSuccessMsg: boolean = true
+) => {
+	// deviceOpened -> device -> client, so client check not necessary here.
+	await deviceOpened(
+		wClient,
+		ctx,
+		ev,
+		async () => {
+			// Device is opened.
+			if (wClient.getDFUInterface() != undefined) {
+				const responseData = await func();
+				// Func completed successfully
+				if (sendSuccessMsg)
+					ctx.postMessage(new EventResponse(ev.data, Status.SUCCESS, responseData));
+			} else {
+				ctx.postMessage(new EventResponse(ev.data, Status.ERR_DEVICE_INTERFACE_NOT_FOUND));
+			}
+		},
+		false
+	);
+};
