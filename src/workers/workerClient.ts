@@ -9,6 +9,7 @@ import { IPredicate } from "./interface/filters";
 export class WorkerClient {
 	private device: USBDevice = undefined;
 	private interface: USBInterface = undefined;
+	private DFUinterface: USBInterface = undefined;
 
 	private bulkListener: BulkListener = undefined;
 
@@ -39,6 +40,10 @@ export class WorkerClient {
 		return this.interface;
 	}
 
+	getDFUInterface() {
+		return this.DFUinterface;
+	}
+
 	getBulkListener() {
 		return this.bulkListener;
 	}
@@ -49,6 +54,10 @@ export class WorkerClient {
 
 	setInterface(iface: USBInterface) {
 		this.interface = iface;
+	}
+
+	setDFUInterface(iface: USBInterface) {
+		this.DFUinterface = iface;
 	}
 
 	setBulkListener(listener: BulkListener) {
