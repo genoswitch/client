@@ -4,6 +4,7 @@ import { BuildInfo } from "../structs/vendor/buildInfo";
 import { FeatureSet } from "../structs/vendor/featureSet";
 import { Version } from "../structs/vendor/version";
 import { BulkListener } from "./bulkListener";
+import { IPredicate } from "./interface/filters";
 
 export class WorkerClient {
 	private device: USBDevice = undefined;
@@ -55,18 +56,10 @@ export class WorkerClient {
 	}
 
 	// Assumes device is alraedy available
-	findInterface() {
+	findInterface(predicate: IPredicate) {
 		const interfaces = this.device.configuration.interfaces;
 
-		const matches = interfaces.filter(iface => {
-			const matching = iface.alternate.endpoints.filter(
-				endpoint => endpoint.endpointNumber == Constants.ENDPOINT
-			);
-			// Check if we have a match
-			if (matching.length > 0) {
-				return iface;
-			}
-		});
+		const matches = interfaces.filter(predicate);
 
 		if (matches.length == 1) {
 			return matches[0];
