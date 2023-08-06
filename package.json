@@ -27,6 +27,7 @@
 		"webpack-cli": "^5.0.1"
 	},
 	"dependencies": {
+		"comlink": "^4.4.1",
 		"uuid": "^9.0.0"
 	}
 }
